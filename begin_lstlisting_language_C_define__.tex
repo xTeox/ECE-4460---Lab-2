@@ -22,9 +22,9 @@ main()
         display_count[i] = 0;
     SetVectIntern(0x0A, Tmr_A_isr);
     WrPortI(TAT7R, &TAT7RShadow, 0x3F);
-    WrPortI(TAT6R, &TAT6RShadow,  127);
-    WrPortI(TAT5R, &TAT5RShadow,  255);
-    WrPortI(TAT1R, &TAT1RShadow,  255);
+    WrPortI(TAT6R, &TAT6RShadow, 0x7F);
+    WrPortI(TAT5R, &TAT5RShadow, 0xFF);
+    WrPortI(TAT1R, &TAT1RShadow, 0xFF);
     WrPortI(TACR,  &TACRShadow,  0xE1);
     WrPortI(TACSR, &TACSRShadow, 0xE1);
     DispStr(5, 10, "<-PRESS 'Q' TO QUIT->");
