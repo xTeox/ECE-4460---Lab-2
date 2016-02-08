@@ -7,5 +7,5 @@ Part C: Timer B ISR with RTOS.tex
 Conclusion.tex
 appendix_test__.tex
 LAB2A.c.tex
-LAB2B.c.tex
+Appendix B: LAB2B.c.tex
 Appendix C: LAB2C.c.tex
