@@ -1,14 +1,30 @@
 \appendix Appendix C
 \\Modified code LAB2C.c.
 \begin{lstlisting}[language=C]
-#define TASK_STK_SIZE    512
-#define OS_MAX_EVENTS      1
-#define OS_MAX_TASKS       4
-#define OS_TASK_STAT_EN    1
-#define OS_TICKS_PER_SEC 128
+
+#define SYSTEM_CLOCK 10606061
+#define SIGNAL_FREQ        50
+#define DUTY_CYCLE        0.2
+#define TIMER_COUNTER     350
+#define TIMER_COUNTER_M (UBYTE)
+ ((TIMER_COUNTER & 0x300) >> 8)
+#define TIMER_COUNTER_L (UBYTE)
+ (TIMER_COUNTER &  0xFF)
+#define DUTY_TIME       (float)
+ DUTY_CYCLE / SIGNAL_FREQ
+#define TIMER_SIG_COUNT   (int)
+ (DUTY_TIME / TIMER_COUNTER * SYSTEM_CLOCK)
+#define ON                  1
+#define OFF                 0
+#define LED                 1
+#define TASK_STK_SIZE     512
+#define OS_MAX_EVENTS       1
+#define OS_MAX_TASKS        4
+#define OS_TASK_STAT_EN     1
+#define OS_TICKS_PER_SEC  128
 #use "ucos2.lib"
 void TaskStart(void *data);
-void Task(void *data);
+void TaskScreenUpd(void *data);
 void InitTimerInt();
 void Tmr_B_isr();
 void UpdateStat();
@@ -17,6 +33,7 @@ OS_EVENT *TimerSem;
 int int_count;
 int display_int_count;
 int Timer_B_value;
+int output_level;
 void main (void)
 {
     brdInit();
@@ -28,7 +45,8 @@ void main (void)
 }
 void TaskStart (void *data)
 {
-    OSTaskCreate(Task, (void *)0,
+    output_level = OFF;
+    OSTaskCreate(TaskScreenUpd, (void *)0,
      TASK_STK_SIZE, 11);
     InitTimerInt();
     OSStatInit();
@@ -41,7 +59,7 @@ void TaskStart (void *data)
         OSTimeDly(OS_TICKS_PER_SEC);
     }
 }
-nodebug void Task (void *data)
+nodebug void TaskScreenUpd (void *data)
 {
     auto UBYTE err;
     auto char display[128];
@@ -60,7 +78,7 @@ nodebug void Task (void *data)
         sprintf(display, "%5d", display_int_count);
         DispStr(35, 2, display);
         display[0] = '\0';
-        sprintf(display, "%5d", Timer_B_value-350);
+        sprintf(display, "%5d", 350-Timer_B_value);
         DispStr(23, 4, display);
     }
 }
@@ -80,18 +98,23 @@ nodebug root interrupt void Tmr_B_isr()
     int TBCMR_status, TBCLR_status;
     char TMRB_status;
     TMRB_status = RdPortI(TBCSR);
-    WrPortI(TBM1R, NULL, 0x40);
-    WrPortI(TBL1R, NULL, 0x5E);
+    WrPortI(TBM1R, NULL, TIMER_COUNTER_M);
+    WrPortI(TBL1R, NULL, TIMER_COUNTER_L);
     int_count++;
     if (int_count == 1000) {
         display_int_count++;
         int_count = 0;
+        OSSemPost(TimerSem);
     }
     TBCLR_status = RdPortI(TBCLR);
     TBCMR_status = RdPortI(TBCMR);
     if (!(TBCLR_status & 0x80) &&
      ((TBCLR_status ^ RdPortI(TBCLR)) & 0x80))
         TBCMR_status--;
+    if (int_count == TIMER_SIG_COUNT) {
+        output_level ^= ON;
+        digOut(LED, output_level);
+    }
     OSIntExit();
 }
 void UpdateStat()
