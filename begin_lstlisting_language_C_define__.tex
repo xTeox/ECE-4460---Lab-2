@@ -1,0 +1,78 @@
+\begin{lstlisting}[language=C]
+#define MAX_COUNT   100
+#define TMA5_MASK  0x20
+#define TMA6_MASK  0x40
+#define TMA7_MASK  0x80
+char count_TMRA5;
+char count_TMRA6;
+char count_TMRA7;
+int  display_count[3];
+char i;
+void Tmr_A_isr();
+void DispStr(int x, int y, char *s);
+main()
+{
+    auto char display[128];
+    auto char key;
+    brdInit();
+    count_TMRA5 = 0;
+    count_TMRA6 = 0;
+    count_TMRA7 = 0;
+    for (i = 0; i < 3; i++)
+        display_count[i] = 0;
+    SetVectIntern(0x0A, Tmr_A_isr);
+    WrPortI(TAT7R, &TAT7RShadow, 0x3F);
+    WrPortI(TAT6R, &TAT6RShadow, 0x7F);
+    WrPortI(TAT5R, &TAT5RShadow, 0xFF);
+    WrPortI(TAT1R, &TAT1RShadow, 0xFF);
+    WrPortI(TACR,  &TACRShadow,  0xE1);
+    WrPortI(TACSR, &TACSRShadow, 0xE1);
+    DispStr(5, 10, "<-PRESS 'Q' TO QUIT->");
+    while (1) {
+        for(i = 0; i < 3; i++) {
+            display[0] = '\0';
+            sprintf(display, 
+             "Number of TMRA%d interrupts: %d x100",
+             i+5, display_count[i]);
+            DispStr(5, i+1, display);
+        }
+        if (kbhit()) {
+            key = getchar();
+            if (key == 0x71 || key == 0x51)
+                exit(0);
+        }
+    }
+}
+nodebug root interrupt void Tmr_A_isr()
+{
+    char TMRA_status;
+    TMRA_status = RdPortI(TACSR);
+    if (TMRA_status & TMA5_MASK) {
+        count_TMRA5++;
+        if (count_TMRA5 == MAX_COUNT) {
+            display_count[0]++;
+            count_TMRA5 = 0;
+        }
+    }
+    if (TMRA_status & TMA6_MASK) {
+        count_TMRA6++;
+        if (count_TMRA6 == MAX_COUNT) {
+            display_count[1]++;
+            count_TMRA6 = 0;
+        }
+    }
+    if (TMRA_status & TMA7_MASK) {
+        count_TMRA7++;
+        if (count_TMRA7 == MAX_COUNT) {
+            display_count[2]++;
+            count_TMRA7 = 0;
+        }
+    }
+}
+void DispStr(int x, int y, char *s)
+{
+   x += 0x20;
+   y += 0x20;
+   printf ("\x1B=%c%c%s", x, y, s);
+}
+\end{lstlisting}
