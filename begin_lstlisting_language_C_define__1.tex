@@ -28,7 +28,7 @@ void main (void)
     brdInit();
     OSInit();
     OSTaskCreate(TaskStart, (void*) 0,
-                TASK_STK_SIZE, 10);
+                 TASK_STK_SIZE, 10);
     for (i = 0 ; i < N_TASKS ; i++)
         TimerSem[i] = OSSemCreate(0);
     OSStart();
