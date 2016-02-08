@@ -5,4 +5,4 @@ Part A: Timer A ISR.tex
 LAB2A.c.tex
 Part B: Timer A ISR with RTOS.tex
 LAB2B.c.tex
-C. Timer B ISR with RTOS.tex
+Part C: Timer B ISR with RTOS.tex
