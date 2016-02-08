@@ -23,16 +23,19 @@ void main (void)
 {
     brdInit();
     OSInit();
-    OSTaskCreate(TaskStart, (void *)0, TASK_STK_SIZE, 10);
+    OSTaskCreate(TaskStart, (void *)0,
+     TASK_STK_SIZE, 10);
     TimerSem = OSSemCreate(0);
     OSStart();
 }
 void TaskStart (void *data)
 {
-    OSTaskCreate(Task, (void *)0, TASK_STK_SIZE, 11);
+    OSTaskCreate(Task, (void *)0,
+     TASK_STK_SIZE, 11);
     InitTimerInt();
     OSStatInit();
-    DispStr(0, 12, "#Tasks          : xxxxx  CPU Usage: xxxxx %");
+    DispStr(0, 12,
+     "#Tasks          : xxxxx  CPU Usage: xxxxx %");
     DispStr(0, 13, "#Task switch/sec: xxxxx");
     DispStr(0, 14, "<-PRESS 'Q' TO QUIT->");
     for (;;) {
@@ -45,11 +48,13 @@ nodebug void Task (void *data)
     auto UBYTE err;
     auto char display[128];
     auto char key;    
-      display[0] = '\0';
-       sprintf(display, "Number of Timer B interrupts: xxxxx (x1000)");
+    display[0] = '\0';
+    sprintf(display,
+     "Number of Timer B interrupts: xxxxx (x1000)");
     DispStr(5, 2, display);
     display[0] = '\0';
-    sprintf(display, "Timer B overhead: xxxxx  x(PCLK/16 cycles)");
+    sprintf(display,
+     "Timer B overhead: xxxxx  x(PCLK/16 cycles)");
     DispStr(5, 4, display);
     for (;;) {
         OSSemPend(TimerSem, 0, &err);
@@ -86,7 +91,8 @@ nodebug root interrupt void Tmr_B_isr()
     }
     TBCLR_status = RdPortI(TBCLR);
     TBCMR_status = RdPortI(TBCMR);
-    if (!(TBCLR_status & 0x80) && ((TBCLR_status ^ RdPortI(TBCLR)) & 0x80))
+    if (!(TBCLR_status & 0x80) &&
+     ((TBCLR_status ^ RdPortI(TBCLR)) & 0x80))
         TBCMR_status--;
     OSIntExit();
 }
