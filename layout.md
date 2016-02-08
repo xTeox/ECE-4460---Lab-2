@@ -8,4 +8,4 @@ Conclusion.tex
 appendix_test__.tex
 LAB2A.c.tex
 LAB2B.c.tex
-LAB2C.c.tex
+Appendix C: LAB2C.c.tex
