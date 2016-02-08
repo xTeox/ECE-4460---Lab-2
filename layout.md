@@ -1,6 +1,6 @@
 Introduction.tex
 Materials.tex
 Laboratory Procedure.tex
-Main Clock Frequency.tex
+A. Timer A ISR.tex
 begin_lstlisting_language_C_define__1.tex
 begin_lstlisting_language_C_define__2.tex
