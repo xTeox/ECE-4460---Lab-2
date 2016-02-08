@@ -41,8 +41,7 @@ main()
         }
         if (kbhit()) {
             key = getchar();
-            if (key == 0x71 || key == 0x51)
-                exit(0);
+            if (key == 0x71 || key == 0x51) exit(0);
         }
     }
 }
@@ -53,22 +52,19 @@ nodebug root interrupt void Tmr_A_isr()
     if (TMRA_status & TMA5_MASK) {
         count_TMRA5++;
         if (count_TMRA5 == MAX_COUNT) {
-            display_count[0]++;
-            count_TMRA5 = 0;
+            display_count[0]++; count_TMRA5 = 0;
         }
     }
     if (TMRA_status & TMA6_MASK) {
         count_TMRA6++;
         if (count_TMRA6 == MAX_COUNT) {
-            display_count[1]++;
-            count_TMRA6 = 0;
+            display_count[1]++; count_TMRA6 = 0;
         }
     }
     if (TMRA_status & TMA7_MASK) {
         count_TMRA7++;
         if (count_TMRA7 == MAX_COUNT) {
-            display_count[2]++;
-            count_TMRA7 = 0;
+            display_count[2]++; count_TMRA7 = 0;
         }
     }
 }
