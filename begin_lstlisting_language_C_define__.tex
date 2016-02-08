@@ -32,8 +32,8 @@ main()
         for(i = 0; i < 3; i++) {
             display[0] = '\0';
             sprintf(display, 
-                    "Number of TMRA%d interrupts: %d\  (x100)",
-                    i+5, display_count[i]);
+                "Number of TMRA%d interrupts: %d\  (x100)",
+                i+5, display_count[i]);
             DispStr(5, i+1, display);
         }
         if (kbhit()) {
