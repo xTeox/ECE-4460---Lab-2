@@ -7,4 +7,4 @@ Part B: Timer A ISR with RTOS.tex
 LAB2B.c.tex
 Part C: Timer B ISR with RTOS.tex
 LAB2C.c.tex
-section_Conclusion__.tex
+Conclusion.tex
