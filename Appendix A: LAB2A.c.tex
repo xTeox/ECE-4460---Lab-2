@@ -68,8 +68,7 @@ nodebug root interrupt void Tmr_A_isr()
 }
 void DispStr(int x, int y, char *s)
 {
-   x += 0x20;
-   y += 0x20;
+   x += 0x20; y += 0x20;
    printf ("\x1B=%c%c%s", x, y, s);
 }
 \end{lstlisting}
