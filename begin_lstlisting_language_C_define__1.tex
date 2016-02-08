@@ -59,7 +59,8 @@ nodebug void Task (void *data)
     auto char display[128];
     num = *((int *)data) + 5;
     sprintf(display,
-     "Number of TMRA%d interrupts: xxxxx  (x100)", num);
+     "Number of TMRA%d interrupts: xxxxx  (x100)",
+     num);
     DispStr(20, num, display);
     for (;;) {
         num = *((int *)data);
