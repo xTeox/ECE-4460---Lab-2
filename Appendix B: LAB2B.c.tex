@@ -1,6 +1,5 @@
 \section{Modified code LAB2B.c.}
 \begin{lstlisting}[language=C]
-
 #define TASK_STK_SIZE    512
 #define N_TASKS            3
 #define MAX_COUNT        100
@@ -54,11 +53,6 @@ void TaskStart (void *data)
         OSTimeDly(OS_TICKS_PER_SEC);
     }
 }
-/*
-*********************************************************************************************************
-*                                                  TASKS
-*********************************************************************************************************
-*/
 nodebug void Task (void *data)
 {
     auto UBYTE err;
@@ -66,7 +60,8 @@ nodebug void Task (void *data)
     auto char display[128];
     num = *((int *)data);
     sprintf(display,
-     "Number of TMRA%d interrupts: xxxxx (x100)", num+5);
+     "Number of TMRA%d interrupts: xxxxx (x100)",
+     num+5);
     DispStr(20, num + 5, display);
     for (;;) {
         num = *((int *)data);
