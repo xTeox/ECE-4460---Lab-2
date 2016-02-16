@@ -1,16 +1,19 @@
 \section{Modified code LAB2B.c.}
 \begin{lstlisting}[language=C]
-#define TASK_STK_SIZE 512
-#define N_TASKS         3
-#define MAX_COUNT     100
-#define TMA5_MASK    0x20
-#define TMA6_MASK    0x40
-#define TMA7_MASK    0x80
+
+#define TASK_STK_SIZE    512
+#define N_TASKS            3
+#define MAX_COUNT        100
+#define TMA5_MASK       0x20
+#define TMA6_MASK       0x40
+#define TMA7_MASK       0x80
 #define OS_MAX_EVENTS      2
 #define OS_MAX_TASKS      11
 #define OS_TASK_STAT_EN    1
 #define OS_TICKS_PER_SEC 128
 #use "ucos2.lib"
+UBYTE     TaskData[N_TASKS];
+OS_EVENT *TimerSem[N_TASKS];
 void InitTimerInt();
 void Tmr_A_isr();
 void UpdateStat();
@@ -21,14 +24,12 @@ char count_TMRA5;
 char count_TMRA6;
 char count_TMRA7;
 int display_count[N_TASKS];
-UBYTE     TaskData[N_TASKS];
-OS_EVENT *TimerSem[N_TASKS];
 void main (void)
 {
     auto UBYTE i;
     brdInit();
     OSInit();
-    OSTaskCreate(TaskStart, (void*) 0,
+    OSTaskCreate(TaskStart, (void *)0,
                  TASK_STK_SIZE, 10);
     for (i = 0 ; i < N_TASKS ; i++)
         TimerSem[i] = OSSemCreate(0);
@@ -37,13 +38,13 @@ void main (void)
 void TaskStart (void *data)
 {
     auto UBYTE  i;
+    OSStatInit();
     for (i = 0; i < N_TASKS; i++) {
-        TaskData[i] = i;
+        TaskData[i] =  i;
         OSTaskCreate(Task, (void *)&TaskData[i],
-                     TASK_STK_SIZE, 11+i);
+                     TASK_STK_SIZE, i + 11);
     }
     InitTimerInt();
-    OSStatInit();
     DispStr(0, 12,
      "#Tasks          : xxxxx  CPU Usage: xxxxx %");
     DispStr(0, 13, "#Task switch/sec: xxxxx");
@@ -53,22 +54,26 @@ void TaskStart (void *data)
         OSTimeDly(OS_TICKS_PER_SEC);
     }
 }
+/*
+*********************************************************************************************************
+*                                                  TASKS
+*********************************************************************************************************
+*/
 nodebug void Task (void *data)
 {
     auto UBYTE err;
     auto UBYTE num;
     auto char display[128];
-    num = *((int *)data) + 5;
+    num = *((int *)data);
     sprintf(display,
-     "Number of TMRA%d interrupts: xxxxx  (x100)",
-     num);
-    DispStr(20, num, display);
+     "Number of TMRA%d interrupts: xxxxx (x100)", num+5);
+    DispStr(20, num + 5, display);
     for (;;) {
         num = *((int *)data);
         display[0] = '\0';
         OSSemPend(TimerSem[num], 0, &err);
         sprintf(display, "%5d", display_count[num]);
-        DispStr(48, num+5, display);
+        DispStr(48, num + 5, display);
     }
 }
 nodebug root interrupt void Tmr_A_isr()
@@ -122,10 +127,10 @@ void UpdateStat()
     char key, s[50];
     sprintf(s, "%5d", OSTaskCtr);
     DispStr(18, 12, s);
-    #if OS_TASK_STAT_EN
-        sprintf(s, "%5d", OSCPUUsage);
-        DispStr(36, 12, s);
-    #endif
+#if OS_TASK_STAT_EN
+    sprintf(s, "%5d", OSCPUUsage);
+    DispStr(36, 12, s);
+#endif
     sprintf(s, "%5d", OSCtxSwCtr);
     DispStr(18, 13, s);
     OSCtxSwCtr = 0;
