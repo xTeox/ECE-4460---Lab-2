@@ -9,3 +9,4 @@ Appendix A: LAB2A.c.tex
 Appendix B: LAB2B.c.tex
 figures/LAB2B/LAB2B.PNG
 Appendix C: LAB2C.c.tex
+Appendix D: lab2c-RTOS.c.tex
