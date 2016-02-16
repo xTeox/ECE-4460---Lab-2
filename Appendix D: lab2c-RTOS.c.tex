@@ -1,0 +1,65 @@
+\vfill \columnbreak
+\section{Modified code LAB2C.c.}
+\begin{lstlisting}[language=C]
+int int_count;
+int display_int_count;
+int Timer_B_value;
+void Tmr_B_isr();
+void DispStr(int x, int y, char *s);
+main()
+{
+    auto char display[128];
+    auto char key;
+    brdInit();
+    int_count = 0;
+    display_int_count = 0;
+    Timer_B_value = 0;
+    SetVectIntern(0x0B, Tmr_B_isr);
+    WrPortI(TBCR, &TBCRShadow, 0x0A);
+    WrPortI(TBM1R, NULL, 0x40 );
+    WrPortI(TBL1R, NULL, 0x5E    );
+    WrPortI(TBCSR, &TBCSRShadow, 0x03 );
+    while(1) {
+        display[0] = '\0';
+        sprintf(display, 
+         "Number of Timer B interrupts = %d (X1000)", 
+         display_int_count);
+        DispStr(5, 2, display);
+        display[0] = '\0';
+        sprintf(display, 
+         "Timer B overhead = %d  x(PCLK/16 cycles)", 
+         Timer_B_value - 350);
+        DispStr(5, 4, display);
+        if (kbhit()) {
+            key = getchar();
+            if (key == 0x71 || key == 0x51)
+                exit(0);
+        }
+    }
+}
+nodebug root interrupt void Tmr_B_isr()
+{
+    char TMRB_status;
+    int tl, th;
+    TMRB_status = RdPortI(TBCSR);
+    WrPortI(TBM1R, NULL, 0x40);
+    WrPortI(TBL1R, NULL, 0x5E);
+    int_count++;
+    if (int_count == 1000){
+        display_int_count++;
+        int_count = 0;
+    }
+    tl = RdPortI(TBCLR);
+    th = RdPortI(TBCMR) & 0xC0;
+    if (!(tl & 0x80) & (tl ^ RdPortI(TBCLR)) & 0x80)
+        th = RdPortI(TBCMR)-1;
+    Timer_B_value = (((int)th & 0xC0) << 2) + tl;
+}
+void DispStr(int x, int y, char *s)
+{
+    x += 0x20;
+    y += 0x20;
+    printf ("\x1B=%c%c%s", x, y, s);
+}
+\end{lstlisting}
+\end{appendices}
