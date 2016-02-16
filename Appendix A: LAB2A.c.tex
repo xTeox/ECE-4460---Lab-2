@@ -13,13 +13,14 @@ void Tmr_A_isr();
 void DispStr(int x, int y, char *s);
 main()
 {
-    auto char display[128]
-    auto char key;
+    auto char display[128], key;
     auto unsigned long T0;
     auto int timeElapsed;
     timeElapsed = 10000;
     brdInit();
-    count_TMRA5 = 0; count_TMRA6 = 0; count_TMRA7 = 0;
+    count_TMRA5 = 0;
+    count_TMRA6 = 0;
+    count_TMRA7 = 0;
     for (i = 0; i < 3; i++)
         display_count[i] = 0;
     SetVectIntern(0x0A, Tmr_A_isr);
