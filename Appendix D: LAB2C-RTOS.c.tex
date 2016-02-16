@@ -110,7 +110,7 @@ nodebug root interrupt void Tmr_B_isr()
     if (!(TBCLR_status & 0x80) &&
         ((TBCLR_status ^ RdPortI(TBCLR)) & 0x80))
         TBCMR_status = RdPortI(TBCMR)-1;
-    Timer_B_value = (((int)TBCMR_status & 0xC0) << 2)
+    Timer_B_value = (((int)TBCMR_status & 0xC0)<<2)
                     + TBCLR_status;
     if (int_count == TIMER_SIG_COUNT) {
         output_level ^= ON;
