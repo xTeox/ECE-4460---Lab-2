@@ -1,14 +1,25 @@
 \vfill \columnbreak
 \section{Modified code LAB2C.c to run in a RTOS.}
 \begin{lstlisting}[language=C]
-#define TASK_STK_SIZE    512
-#define OS_MAX_EVENTS      1
-#define OS_MAX_TASKS       4
-#define OS_TASK_STAT_EN    1
-#define OS_TICKS_PER_SEC 128
+#define SYSTEM_CLOCK 20909240
+#define SIGNAL_FREQ        50
+#define DUTY_CYCLE        0.2
+#define TIMER_COUNTER     350
+#define TIMER_COUNTER_M (UBYTE) ((TIMER_COUNTER & 0x300) >> 2)
+#define TIMER_COUNTER_L (UBYTE)  (TIMER_COUNTER &  0xFF)
+#define DUTY_TIME       (float)   DUTY_CYCLE / SIGNAL_FREQ
+#define TIMER_SIG_COUNT   (int)  (DUTY_TIME / TIMER_COUNTER * SYSTEM_CLOCK)
+#define ON                  1
+#define OFF                 0
+#define LED                 1
+#define TASK_STK_SIZE     512
+#define OS_MAX_EVENTS       1
+#define OS_MAX_TASKS        4
+#define OS_TASK_STAT_EN     1
+#define OS_TICKS_PER_SEC  128
 #use "ucos2.lib"
 void TaskStart(void *data);
-void Task(void *data);
+void TaskScreenUpd(void *data);
 void InitTimerInt();
 void Tmr_B_isr();
 void UpdateStat();
@@ -17,23 +28,22 @@ OS_EVENT *TimerSem;
 int int_count;
 int display_int_count;
 int Timer_B_value;
+int output_level;
 void main (void)
 {
     brdInit();
     OSInit();
-    OSTaskCreate(TaskStart, (void *)0,
-     TASK_STK_SIZE, 10);
+    OSTaskCreate(TaskStart, (void *)0, TASK_STK_SIZE, 10);
     TimerSem = OSSemCreate(0);
     OSStart();
 }
 void TaskStart (void *data)
 {
-    OSTaskCreate(Task, (void *)0,
-     TASK_STK_SIZE, 11);
-    InitTimerInt();
+    output_level = OFF;
     OSStatInit();
-    DispStr(0, 12,
-     "#Tasks          : xxxxx  CPU Usage: xxxxx %");
+    OSTaskCreate(TaskScreenUpd, (void *)0, TASK_STK_SIZE, 11);
+    InitTimerInt();
+    DispStr(0, 12, "#Tasks          : xxxxx  CPU Usage: xxxxx %");
     DispStr(0, 13, "#Task switch/sec: xxxxx");
     DispStr(0, 14, "<-PRESS 'Q' TO QUIT->");
     for (;;) {
@@ -41,18 +51,15 @@ void TaskStart (void *data)
         OSTimeDly(OS_TICKS_PER_SEC);
     }
 }
-nodebug void Task (void *data)
+nodebug void TaskScreenUpd (void *data)
 {
     auto UBYTE err;
     auto char display[128];
-    auto char key;    
     display[0] = '\0';
-    sprintf(display,
-     "Number of Timer B interrupts: xxxxx (x1000)");
+    sprintf(display, "Number of Timer B interrupts: xxxxx (x1000)");
     DispStr(5, 2, display);
     display[0] = '\0';
-    sprintf(display,
-     "Timer B overhead: xxxxx  x(PCLK/16 cycles)");
+    sprintf(display, "Timer B overhead: xxxxx  (xPCLK/16 cycles)");
     DispStr(5, 4, display);
     for (;;) {
         OSSemPend(TimerSem, 0, &err);
@@ -60,7 +67,7 @@ nodebug void Task (void *data)
         sprintf(display, "%5d", display_int_count);
         DispStr(35, 2, display);
         display[0] = '\0';
-        sprintf(display, "%5d", Timer_B_value-350);
+        sprintf(display, "%5d", Timer_B_value - TIMER_COUNTER);
         DispStr(23, 4, display);
     }
 }
@@ -80,18 +87,24 @@ nodebug root interrupt void Tmr_B_isr()
     int TBCMR_status, TBCLR_status;
     char TMRB_status;
     TMRB_status = RdPortI(TBCSR);
-    WrPortI(TBM1R, NULL, 0x40);
-    WrPortI(TBL1R, NULL, 0x5E);
+    WrPortI(TBM1R, NULL, TIMER_COUNTER_M);
+    WrPortI(TBL1R, NULL, TIMER_COUNTER_L);
     int_count++;
     if (int_count == 1000) {
         display_int_count++;
         int_count = 0;
+        OSSemPost(TimerSem);
     }
     TBCLR_status = RdPortI(TBCLR);
-    TBCMR_status = RdPortI(TBCMR);
+    TBCMR_status = RdPortI(TBCMR) & 0xC0;
     if (!(TBCLR_status & 0x80) &&
-     ((TBCLR_status ^ RdPortI(TBCLR)) & 0x80))
-        TBCMR_status--;
+        ((TBCLR_status ^ RdPortI(TBCLR)) & 0x80))
+        TBCMR_status = RdPortI(TBCMR)-1;
+    Timer_B_value = (((int)TBCMR_status & 0xC0) << 2) + TBCLR_status;
+    if (int_count == TIMER_SIG_COUNT) {
+        output_level ^= ON;
+        digOut(LED, output_level);
+    }
     OSIntExit();
 }
 void UpdateStat()
@@ -100,8 +113,8 @@ void UpdateStat()
     sprintf(s, "%5d", OSTaskCtr);
     DispStr(18, 12, s);
     #if OS_TASK_STAT_EN
-        sprintf(s, "%5d", OSCPUUsage);
-        DispStr(36, 12, s);
+    sprintf(s, "%5d", OSCPUUsage);
+    DispStr(36, 12, s);
     #endif
     sprintf(s, "%5d", OSCtxSwCtr);
     DispStr(18, 13, s);
@@ -114,8 +127,9 @@ void UpdateStat()
 }
 void DispStr(int x, int y, char *s)
 {
-   x += 0x20;
-   y += 0x20;
-   printf ("\x1B=%c%c%s", x, y, s);
+    x += 0x20;
+    y += 0x20;
+    printf ("\x1B=%c%c%s", x, y, s);
 }
 \end{lstlisting}
+\end{appendices}
