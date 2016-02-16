@@ -22,12 +22,12 @@ main()
     while(1) {
         display[0] = '\0';
         sprintf(display, 
-         "Number of Timer B interrupts = %d (X1000)", 
+         "Number of TimerB interrupts = %d (x1000)",
          display_int_count);
         DispStr(5, 2, display);
         display[0] = '\0';
         sprintf(display, 
-         "Timer B overhead = %d  x(PCLK/16 cycles)", 
+         "TimerB overhead = %d  (xPCLK/16 cycles)",
          Timer_B_value - 350);
         DispStr(5, 4, display);
         if (kbhit()) {
