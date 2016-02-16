@@ -36,3 +36,12 @@ All Timer B special function register were set properly to enable its clock with
 As the Rabbit 2000 is a 8-bit microprocessor \cite{Digi_International_2007}, the 10-bit Timer B count is divided into two 8-bit timer counts: TBCMR 2 MSBs and TBCLR 8 bits, one after another. Because of this, if one of these counters is read after the other, it can be changed between this process. Thus, to calculate correctly this combined value, TBCLR is read, then TBCMR, and after TBCLR again to check if there is any change in its MSB. If there is, TBCMR is decreased. Finally, the timer counter value Timer\_B\_value is set with the value of TBCLR summed to TBCMR shifted 2 bits to the left. 
 
 In order to be able to simulate the PWM signal, it is needed the correct value of the system frequency. Thus, to avoid problems with possible trades of development boards, this value were captured again following the procedure of the last laboratory's first part. However, it was noticed that the method used less information than it was necessary. Therefore, the procedure was redone capturing the correct information about the amount of cycles is necessary to complete the code and then calculate correctly the CPU frequency. The value returned in this procedure was 128 cycles and approximately 20.9 GHz. This frequency was defined as SYSTEM\_CLOCK in the code and then used in the other constants to help in the calculation of the duty timer count to simulate the PWM signal.
+
+The results gathered by the first program code are illustrated in [].
+
+\begin{figure}[!ht]
+  \caption{Output of program LAB2C.c modified.}
+  \centering
+     Number of Timer B interrupts = 50 (x1000)
+     Timer B overhead = 23 x (PCLK/16 cycles)
+\end{figure}
