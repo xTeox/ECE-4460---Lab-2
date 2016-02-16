@@ -5,10 +5,14 @@
 #define SIGNAL_FREQ        50
 #define DUTY_CYCLE        0.2
 #define TIMER_COUNTER     350
-#define TIMER_COUNTER_M (UBYTE) ((TIMER_COUNTER & 0x300) >> 2)
-#define TIMER_COUNTER_L (UBYTE)  (TIMER_COUNTER &  0xFF)
-#define DUTY_TIME       (float)   DUTY_CYCLE / SIGNAL_FREQ
-#define TIMER_SIG_COUNT   (int)  (DUTY_TIME / TIMER_COUNTER * SYSTEM_CLOCK)
+#define TIMER_COUNTER_M (UBYTE)
+ ((TIMER_COUNTER & 0x300) >> 2)
+#define TIMER_COUNTER_L (UBYTE)
+ (TIMER_COUNTER &  0xFF)
+#define DUTY_TIME       (float)
+ DUTY_CYCLE / SIGNAL_FREQ
+#define TIMER_SIG_COUNT   (int)
+ (DUTY_TIME / TIMER_COUNTER * SYSTEM_CLOCK)
 #define ON                  1
 #define OFF                 0
 #define LED                 1
@@ -33,7 +37,8 @@ void main (void)
 {
     brdInit();
     OSInit();
-    OSTaskCreate(TaskStart, (void *)0, TASK_STK_SIZE, 10);
+    OSTaskCreate(TaskStart, (void *)0,
+                 TASK_STK_SIZE, 10);
     TimerSem = OSSemCreate(0);
     OSStart();
 }
@@ -41,9 +46,11 @@ void TaskStart (void *data)
 {
     output_level = OFF;
     OSStatInit();
-    OSTaskCreate(TaskScreenUpd, (void *)0, TASK_STK_SIZE, 11);
+    OSTaskCreate(TaskScreenUpd, (void *)0,
+                 TASK_STK_SIZE, 11);
     InitTimerInt();
-    DispStr(0, 12, "#Tasks          : xxxxx  CPU Usage: xxxxx %");
+    DispStr(0, 12,
+     "#Tasks          : xxxxx  CPU Usage: xxxxx %");
     DispStr(0, 13, "#Task switch/sec: xxxxx");
     DispStr(0, 14, "<-PRESS 'Q' TO QUIT->");
     for (;;) {
@@ -56,10 +63,12 @@ nodebug void TaskScreenUpd (void *data)
     auto UBYTE err;
     auto char display[128];
     display[0] = '\0';
-    sprintf(display, "Number of Timer B interrupts: xxxxx (x1000)");
+    sprintf(display,
+     "Number of Timer B interrupts: xxxxx (x1000)");
     DispStr(5, 2, display);
     display[0] = '\0';
-    sprintf(display, "Timer B overhead: xxxxx  (xPCLK/16 cycles)");
+    sprintf(display,
+     "Timer B overhead: xxxxx  (xPCLK/16 cycles)");
     DispStr(5, 4, display);
     for (;;) {
         OSSemPend(TimerSem, 0, &err);
@@ -67,7 +76,8 @@ nodebug void TaskScreenUpd (void *data)
         sprintf(display, "%5d", display_int_count);
         DispStr(35, 2, display);
         display[0] = '\0';
-        sprintf(display, "%5d", Timer_B_value - TIMER_COUNTER);
+        sprintf(display,
+         "%5d", Timer_B_value - TIMER_COUNTER);
         DispStr(23, 4, display);
     }
 }
@@ -100,7 +110,8 @@ nodebug root interrupt void Tmr_B_isr()
     if (!(TBCLR_status & 0x80) &&
         ((TBCLR_status ^ RdPortI(TBCLR)) & 0x80))
         TBCMR_status = RdPortI(TBCMR)-1;
-    Timer_B_value = (((int)TBCMR_status & 0xC0) << 2) + TBCLR_status;
+    Timer_B_value =
+     (((int)TBCMR_status & 0xC0) << 2) + TBCLR_status;
     if (int_count == TIMER_SIG_COUNT) {
         output_level ^= ON;
         digOut(LED, output_level);
