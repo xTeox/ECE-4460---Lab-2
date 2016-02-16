@@ -6,17 +6,14 @@
 #define TMA5_MASK 0x20
 #define TMA6_MASK 0x40
 #define TMA7_MASK 0x80
-char count_TMRA5;
-char count_TMRA6;
-char count_TMRA7;
+char count_TMRA5, count_TMRA6, count_TMRA7;
 int display_count[3];
 char i;
 void Tmr_A_isr();
 void DispStr(int x, int y, char *s);
 main()
 {
-    auto char display[128];
-    auto char key;
+    auto char display[128], key;
     auto unsigned long T0;
     auto int timeElapsed;
     timeElapsed = 10000;
@@ -35,33 +32,28 @@ main()
     T0 = MS_TIMER;
     WrPortI(TACSR, &TACSRShadow, 0xE1);
     DispStr(5, 10, "<-PRESS 'Q' TO QUIT->");
-    while (1)    {
+    while (1) {
         for (i = 0; i < 3; i++) {
             display[0] = '\0';
             sprintf(display,
-             "Number of TMRA%d interrupts: %d (x100)",
+             "Number of TMRA%d interrupts: %d x100",
              i+5, display_count[i]);
             DispStr(5, i + 1, display);
         }
         if (kbhit()) {
             key = getchar();
-            if (key == 0x71 || key == 0x51)
-                exit(0);
+            if (key == 0x71 || key == 0x51) exit(0);
         }
-        if (MS_TIMER - T0 >= timeElapsed)
-            break;
+        if (MS_TIMER - T0 >= timeElapsed) break;
     }
 }
 nodebug root interrupt void Tmr_A_isr()
 {
     char TMRA_status;
     TMRA_status = RdPortI(TACSR);
-    if (TMRA_status & 0x20)
-        count_TMRA5++;
-    if (TMRA_status & 0x40)
-        count_TMRA6++;
-    if (TMRA_status & 0x80)
-        count_TMRA7++;
+    if (TMRA_status & 0x20) count_TMRA5++;
+    if (TMRA_status & 0x40) count_TMRA6++;
+    if (TMRA_status & 0x80) count_TMRA7++;
     if (count_TMRA5 == MAX_COUNT) {
         display_count[0]++;
         count_TMRA5 = 0;
