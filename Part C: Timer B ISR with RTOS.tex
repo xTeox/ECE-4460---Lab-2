@@ -3,12 +3,17 @@
 The main purpose of this procedure is to develop a program that counts Timer B interrupts and displays the interrupt overhead and after a RTOS program with the same functionalities added to the simulation of a PWM signal with a LED.
 
 Appendix C shows the program code without RTOS with the proper special timer function register set up. Appendix D shows the program code with RTOS. This program uses the same structure of Part B with one event for a timer semaphore and two tasks and four simple procedures as follow:
-* TaskStart(): Task function that startup other tasks and update screen with its task's statistic;
-* TaskScreenUpd(): Task function that updates screen with Timer B interrupts and overhead;
-* InitTimerInt(): Procedure setup Timer B interrupts;
-* Tmr_B_isr(): Procedure holds the IISR;
-* UpdateStat(): Procedure update RTOS statistics;
-* DispStr(): Procedure set the STDIO cursor location and display a string in the screen.
+
+\begin{itemize}[label={--}]
+\item TaskStart(): Task function that startup other tasks and update screen with its task's statistic;
+\item Real-time operational system kernel μC/OS-II;
+\item Codes provided by the laboratory instructions and the official course website.
+\item TaskScreenUpd(): Task function that updates screen with Timer B interrupts and overhead;
+\item InitTimerInt(): Procedure setup Timer B interrupts;
+\item Tmr_B_isr(): Procedure holds the IISR;
+\item UpdateStat(): Procedure update RTOS statistics;
+\item DispStr(): Procedure set the STDIO cursor location and display a string in the screen.
+\end{itemize}
 
 All Timer B special function register were set properly to enable its clock with perclk/16, priority 1, and B1 count register of 0x15E, as required. The IISR reads the timer counter, increments the necessary variables, post the semaphore when the count reaches 1000 in order to inform the function TaskScreenUpd() that updates screen with the number of interrupts happened and the timer overhead. This last value is calculated by the difference of the timer counter and the count register predefined.
 
